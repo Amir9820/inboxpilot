@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InboxPilot - Reclaim Your Inbox</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0A0F1C 0%, #1a1f3a 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* Custom Cursor Trail */
+        #cursor-trail {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .cursor-dot {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00F7FF;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: fade-out 0.8s ease-out forwards;
+            box-shadow: 0 0 10px #00F7FF;
+        }
+
+        @keyframes fade-out {
+            to {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px 0;
+            backdrop-filter: blur(20px);
+            background: rgba(10, 15, 28, 0.8);
+            border-bottom: 1px solid rgba(0, 247, 255, 0.1);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00F7FF, #9C27FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #00F7FF, #9C27FF);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #00F7FF;
+            border: 1px solid #00F7FF;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 247, 255, 0.3);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ffffff, #00F7FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-content .tagline {
+            font-size: 1.2rem;
+            color: #a0a9c0;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            font-size: 1.1rem;
+            padding: 16px 32px;
+            background: linear-gradient(45deg, #00F7FF, #9C27FF);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(156, 39, 255, 0.4);
+        }
+
+        /* 3D Animation */
+        .hero-animation {
+            position: relative;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .orbit-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 247, 255, 0.1);
+        }
+
+        .email-icon {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #00F7FF, #9C27FF);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            animation: float 6s ease-in-out infinite;
+            box-shadow: 0 5px 20px rgba(0, 247, 255, 0.3);
+        }
+
+        .email-icon:nth-child(1) { animation-delay: 0s; }
+        .email-icon:nth-child(2) { animation-delay: 2s; }
+        .email-icon:nth-child(3) { animation-delay: 4s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* Pricing Section */
+        .pricing {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #1a1f3a 0%, #0A0F1C 100%);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 60px;
+            background: linear-gradient(45deg, #ffffff, #00F7FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .pricing-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 247, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            border-color: #00F7FF;
+            box-shadow: 0 20px 40px rgba(0, 247, 255, 0.2);
+        }
+
+        .pricing-card.featured {
+            border-color: #9C27FF;
+            background: rgba(156, 39, 255, 0.1);
+        }
+
+        .pricing-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #00F7FF;
+        }
+
+        .pricing-card .price {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #ffffff, #9C27FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-bottom: 40px;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            color: #a0a9c0;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            color: #00F7FF;
+            margin-right: 10px;
+        }
+
+        /* Competitor Section */
+        .competitors {
+            padding: 100px 0;
+        }
+
+        .comparison-table {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 40px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 247, 255, 0.1);
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            padding: 20px;
+            background: rgba(0, 247, 255, 0.1);
+            font-weight: 600;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .table-row:hover {
+            background: rgba(0, 247, 255, 0.05);
+        }
+
+        .highlight {
+            color: #00F7FF;
+            font-weight: 600;
+        }
+
+        /* FAQ Section */
+        .faq {
+            padding: 100px 0;
+            background: linear-gradient(135deg, #1a1f3a 0%, #0A0F1C 100%);
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        .faq-item {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 247, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-question:hover {
+            background: rgba(0, 247, 255, 0.05);
+        }
+
+        .faq-answer {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-answer.open {
+            max-height: 200px;
+            padding: 20px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1f3a 0%, #0A0F1C 100%);
+            margin: 5% auto;
+            padding: 0;
+            border: 1px solid rgba(0, 247, 255, 0.2);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            padding: 30px 30px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, #ffffff, #00F7FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .close {
+            color: #a0a9c0;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close:hover {
+            color: #00F7FF;
+            transform: scale(1.2);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-subtitle {
+            color: #a0a9c0;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        /* Auth Options */
+        .auth-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .auth-button {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 247, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .auth-button:hover {
+            background: rgba(0, 247, 255, 0.1);
+            border-color: #00F7FF;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 247, 255, 0.2);
+        }
+
+        .auth-button.outlook:hover {
+            border-color: #9C27FF;
+            background: rgba(156, 39, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(156, 39, 255, 0.2);
+        }
+
+        .auth-icon {
+            font-size: 2rem;
+            width: 50px;
+            text-align: center;
+        }
+
+        .auth-text {
+            flex: 1;
+        }
+
+        .auth-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .auth-subtitle {
+            color: #a0a9c0;
+            font-size: 0.9rem;
+        }
+
+        /* Trial Benefits */
+        .trial-benefits {
+            background: rgba(0, 247, 255, 0.05);
+            border: 1px solid rgba(0, 247, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .trial-benefits h4 {
+            margin-bottom: 15px;
+            color: #00F7FF;
+        }
+
+        .trial-benefits ul {
+            list-style: none;
+            margin: 0;
+        }
+
+        .trial-benefits li {
+            padding: 5px 0;
+            color: #a0a9c0;
+        }
+
+        .trial-note {
+            text-align: center;
+            color: #a0a9c0;
+            font-size: 0.9rem;
+        }
+
+        /* Connection Steps */
+        .connection-steps {
+            margin-bottom: 30px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 0;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .step.active {
+            opacity: 1;
+        }
+
+        .step.completed {
+            opacity: 1;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0, 247, 255, 0.2);
+            border: 2px solid rgba(0, 247, 255, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #00F7FF;
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-number {
+            background: linear-gradient(45deg, #00F7FF, #9C27FF);
+            border-color: transparent;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .step.completed .step-number {
+            background: #00F7FF;
+            border-color: #00F7FF;
+            color: #0A0F1C;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .step-content h4 {
+            margin-bottom: 5px;
+            color: white;
+        }
+
+        .step-content p {
+            color: #a0a9c0;
+            margin: 0;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 247, 255, 0.3);
+            border-top: 2px solid #00F7FF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-top: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Security Note */
+        .security-note {
+            background: rgba(156, 39, 255, 0.05);
+            border: 1px solid rgba(156, 39, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .security-icon {
+            font-size: 1.5rem;
+        }
+
+        .security-note strong {
+            color: #9C27FF;
+        }
+
+        /* Success Modal */
+        .success-body {
+            text-align: center;
+        }
+
+        .success-animation {
+            margin-bottom: 30px;
+        }
+
+        .checkmark {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #00F7FF, #9C27FF);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            margin: 0 auto;
+            animation: checkmarkBounce 0.6s ease-out;
+        }
+
+        @keyframes checkmarkBounce {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .success-body h3 {
+            margin-bottom: 15px;
+            color: #00F7FF;
+        }
+
+        .success-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(0, 247, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 247, 255, 0.1);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00F7FF;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #a0a9c0;
+        }
+
+        .btn.large {
+            font-size: 1.1rem;
+            padding: 16px 40px;
+            margin-bottom: 20px;
+        }
+
+        .trial-reminder {
+            color: #a0a9c0;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+            
+            .nav-container {
+                padding: 0 20px;
+            }
+            
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+
+            .success-stats {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Add Google OAuth Script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gapi/2.0.2/gapi.min.js"></script>
+    <!-- Add Microsoft OAuth Script -->
+    <script src="https://alcdn.msauth.net/browser/2.14.2/js/msal-browser.min.js"></script>
+    
+    <div id="cursor-trail"></div>
+    
+    <nav>
+        <div class="nav-container">
+            <div class="logo">InboxPilot</div>
+            <div class="nav-buttons">
+                <a href="#" class="btn btn-secondary">Login</a>
+                <a href="#" class="btn btn-primary" onclick="openSignupModal()">Start Trial</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1>Reclaim your inbox. Reclaim your time.</h1>
+                <p class="tagline">The smartest way to handle email with AI-powered categorization, auto-replies, and team collaboration. Inbox zero, finally within reach.</p>
+                <button class="cta-button" onclick="openSignupModal()">Start Paid Plan</button>
+            </div>
+            <div class="hero-animation">
+                <div class="orbit-container">
+                    <div class="email-icon" style="top: 20px; left: 50%; transform: translateX(-50%);">📧</div>
+                    <div class="email-icon" style="bottom: 20px; right: 20px;">✉️</div>
+                    <div class="email-icon" style="bottom: 20px; left: 20px;">📨</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing">
+        <h2 class="section-title">Choose Your Plan</h2>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Starter</h3>
+                <div class="price">$9<span style="font-size: 1rem; color: #a0a9c0;">/month</span></div>
+                <ul class="feature-list">
+                    <li>AI Email Categorization</li>
+                    <li>Auto-Reply Drafts</li>
+                    <li>Daily SMS Summary</li>
+                    <li>1 Email Account</li>
+                    <li>Basic Analytics</li>
+                </ul>
+                <button class="btn btn-primary" onclick="openSignupModal()">Get Started</button>
+            </div>
+            <div class="pricing-card featured">
+                <h3>Pro</h3>
+                <div class="price">$19<span style="font-size: 1rem; color: #a0a9c0;">/month</span></div>
+                <ul class="feature-list">
+                    <li>Everything in Starter</li>
+                    <li>Meeting AI Transcripts</li>
+                    <li>Personal Chatbot</li>
+                    <li>3 Email Accounts</li>
+                    <li>Advanced Analytics</li>
+                    <li>Priority Support</li>
+                </ul>
+                <button class="btn btn-primary" onclick="openSignupModal()">Most Popular</button>
+            </div>
+            <div class="pricing-card">
+                <h3>Teams</h3>
+                <div class="price">$49<span style="font-size: 1rem; color: #a0a9c0;">/user/month</span></div>
+                <ul class="feature-list">
+                    <li>Everything in Pro</li>
+                    <li>Shared Inbox View</li>
+                    <li>Team Analytics</li>
+                    <li>Action Item Assignment</li>
+                    <li>Unlimited Accounts</li>
+                    <li>White-label Options</li>
+                </ul>
+                <button class="btn btn-primary">Contact Sales</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="competitors">
+        <h2 class="section-title">How We Compare</h2>
+        <div class="comparison-table">
+            <div class="table-header">
+                <div>Feature</div>
+                <div>InboxPilot</div>
+                <div>Superhuman</div>
+                <div>Spark</div>
+                <div>Gmail</div>
+            </div>
+            <div class="table-row">
+                <div>AI Categorization</div>
+                <div class="highlight">✓ 98% Accurate</div>
+                <div>✓ Basic</div>
+                <div>✗</div>
+                <div>✓ Limited</div>
+            </div>
+            <div class="table-row">
+                <div>Auto-Reply Drafts</div>
+                <div class="highlight">✓ AI-Powered</div>
+                <div>✗</div>
+                <div>✗</div>
+                <div>✗</div>
+            </div>
+            <div class="table-row">
+                <div>Meeting AI</div>
+                <div class="highlight">✓ Full Transcripts</div>
+                <div>✗</div>
+                <div>✗</div>
+                <div>✗</div>
+            </div>
+            <div class="table-row">
+                <div>Team Sharing</div>
+                <div class="highlight">✓ Advanced</div>
+                <div>✓ Basic</div>
+                <div>✓ Basic</div>
+                <div>✓ Basic</div>
+            </div>
+            <div class="table-row">
+                <div>Starting Price</div>
+                <div class="highlight">$9/month</div>
+                <div>$30/month</div>
+                <div>Free</div>
+                <div>Free</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="faq">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <div class="faq-container">
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>How accurate is the AI categorization?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Our AI achieves 98% accuracy in email categorization, continuously learning from your preferences and patterns to improve over time.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Can I integrate with my existing email providers?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Yes! InboxPilot seamlessly integrates with Gmail and Outlook through secure OAuth authentication.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>What happens to my data?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>Your data is encrypted and secure. We use enterprise-grade security and never share your information with third parties.</p>
+                </div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFaq(this)">
+                    <span>Is there a free trial?</span>
+                    <span>+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>We offer a 14-day free trial with full access to all features. Cancel anytime, no questions asked.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Signup Modal -->
+    <div id="signupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Start Your 14-Day Free Trial</h2>
+                <span class="close" onclick="closeModal('signupModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">Choose how you'd like to get started</p>
+                <div class="auth-options">
+                    <button class="auth-button gmail" onclick="authenticateGmail()">
+                        <div class="auth-icon">📧</div>
+                        <div class="auth-text">
+                            <div class="auth-title">Continue with Gmail</div>
+                            <div class="auth-subtitle">Connect your Google account</div>
+                        </div>
+                    </button>
+                    <button class="auth-button outlook" onclick="authenticateOutlook()">
+                        <div class="auth-icon">📮</div>
+                        <div class="auth-text">
+                            <div class="auth-title">Continue with Outlook</div>
+                            <div class="auth-subtitle">Connect your Microsoft account</div>
+                        </div>
+                    </button>
+                </div>
+                <div class="trial-benefits">
+                    <h4>What's included in your trial:</h4>
+                    <ul>
+                        <li>✓ AI Email Categorization (98% accurate)</li>
+                        <li>✓ Auto-Reply Draft Generation</li>
+                        <li>✓ Daily SMS Summaries</li>
+                        <li>✓ Meeting AI Transcripts</li>
+                        <li>✓ Personal Email Chatbot</li>
+                    </ul>
+                </div>
+                <p class="trial-note">No credit card required • Cancel anytime</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Connection Modal -->
+    <div id="emailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="emailModalTitle">Connecting to Gmail...</h2>
+            </div>
+            <div class="modal-body">
+                <div class="connection-steps">
+                    <div class="step active" id="step1">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Redirecting to Authentication</h4>
+                            <p id="authText">Opening Gmail login in secure window...</p>
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </div>
+                    <div class="step" id="step2">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Grant Permissions</h4>
+                            <p>Allow InboxPilot to read and manage your emails</p>
+                        </div>
+                    </div>
+                    <div class="step" id="step3">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>AI Analysis</h4>
+                            <p>Setting up intelligent categorization for your inbox</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="security-note">
+                    <div class="security-icon">🔒</div>
+                    <div>
+                        <strong>Your data is secure</strong><br>
+                        We use enterprise-grade encryption and never store your passwords
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎉 Welcome to InboxPilot!</h2>
+            </div>
+            <div class="modal-body success-body">
+                <div class="success-animation">
+                    <div class="checkmark">✓</div>
+                </div>
+                <h3>Your account is ready!</h3>
+                <p>We've successfully connected your email and started analyzing your inbox.</p>
+                <div class="success-stats">
+                    <div class="stat">
+                        <div class="stat-number" id="emailCount">247</div>
+                        <div class="stat-label">Emails Analyzed</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">4</div>
+                        <div class="stat-label">Categories Created</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Auto-Replies Ready</div>
+                    </div>
+                </div>
+                <button class="btn btn-primary large" onclick="goToDashboard()">Go to Dashboard</button>
+                <p class="trial-reminder">Your 14-day free trial is now active</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Current app state
+        let currentStep = 1;
+        let selectedProvider = '';
+
+        // Cursor trail effect
+        let trail = [];
+        const trailLength = 20;
+
+        document.addEventListener('mousemove', (e) => {
+            trail.push({ x: e.clientX, y: e.clientY, time: Date.now() });
+            
+            if (trail.length > trailLength) {
+                trail.shift();
+            }
+            
+            updateTrail();
+        });
+
+        function updateTrail() {
+            const trailContainer = document.getElementById('cursor-trail');
+            trailContainer.innerHTML = '';
+            
+            trail.forEach((point, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'cursor-dot';
+                dot.style.left = point.x + 'px';
+                dot.style.top = point.y + 'px';
+                dot.style.animationDelay = (index * 0.05) + 's';
+                trailContainer.appendChild(dot);
+            });
+        }
+
+        // OAuth Configuration
+        const GOOGLE_CLIENT_ID = '1089222678499-a0kbclrqgpb5d9goc80afsekhh711had.apps.googleusercontent.com';
+        const MICROSOFT_CLIENT_ID = 'your-microsoft-client-id'; // Replace with your actual client ID
+        
+        // Google OAuth Setup
+        let googleAuth = null;
+        
+        // Microsoft OAuth Setup
+        let msalInstance = null;
+        
+        // Initialize OAuth clients when page loads
+        window.onload = function() {
+            initializeGoogleAuth();
+            initializeMicrosoftAuth();
+        };
+        
+        function initializeGoogleAuth() {
+            try {
+                // Load Google API
+                if (typeof gapi !== 'undefined') {
+                    gapi.load('auth2', function() {
+                        gapi.auth2.init({
+                            client_id: GOOGLE_CLIENT_ID,
+                            scope: 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/userinfo.email'
+                        }).then(function(authInstance) {
+                            googleAuth = authInstance;
+                            console.log('Google Auth initialized successfully');
+                        }).catch(function(error) {
+                            console.log('Google Auth init error:', error);
+                        });
+                    });
+                }
+            } catch (error) {
+                console.log('Google Auth not available:', error);
+            }
+        }
+        
+        function initializeMicrosoftAuth() {
+            try {
+                const msalConfig = {
+                    auth: {
+                        clientId: MICROSOFT_CLIENT_ID,
+                        authority: 'https://login.microsoftonline.com/common',
+                        redirectUri: window.location.origin
+                    },
+                    cache: {
+                        cacheLocation: "sessionStorage",
+                        storeAuthStateInCookie: false,
+                    }
+                };
+                
+                msalInstance = new msal.PublicClientApplication(msalConfig);
+            } catch (error) {
+                console.log('Microsoft Auth not available:', error);
+            }
+        }
+        
+        // Real Gmail Authentication - Fixed Version
+        function authenticateGmail() {
+            selectedProvider = 'gmail';
+            closeModal('signupModal');
+            showConnectionModal('gmail');
+            
+            try {
+                if (googleAuth && googleAuth.isSignedIn) {
+                    // Use Google Auth2 Library
+                    googleAuth.signIn({
+                        scope: 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/userinfo.email'
+                    }).then(function(googleUser) {
+                        const authResponse = googleUser.getAuthResponse();
+                        handleGmailSuccess(authResponse);
+                    }).catch(function(error) {
+                        console.log('Google sign-in error:', error);
+                        handleAuthError('Gmail authentication failed: ' + error.error);
+                    });
+                } else {
+                    // Fallback: Use manual OAuth URL with proper redirect
+                    const currentUrl = window.location.origin + window.location.pathname;
+                    const authUrl = `https://accounts.google.com/oauth/authorize?` +
+                        `client_id=${GOOGLE_CLIENT_ID}&` +
+                        `redirect_uri=${encodeURIComponent(currentUrl)}&` +
+                        `scope=${encodeURIComponent('https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/userinfo.email')}&` +
+                        `response_type=token&` +
+                        `state=gmail&` +
+                        `include_granted_scopes=true`;
+                    
+                    console.log('Redirecting to:', authUrl);
+                    
+                    // For Claude.ai environment, show instructions instead of redirect
+                    if (window.location.hostname.includes('claude.ai') || window.location.hostname.includes('localhost')) {
+                        showAuthInstructions('gmail', authUrl);
+                    } else {
+                        // In production, redirect to Google
+                        window.location.href = authUrl;
+                    }
+                }
+            } catch (error) {
+                console.log('Gmail auth error:', error);
+                handleAuthError('Gmail authentication setup failed');
+            }
+        }
+        
+        // Show OAuth instructions for Claude.ai environment
+        function showAuthInstructions(provider, authUrl) {
+            const step1 = document.getElementById('step1');
+            const stepContent = step1.querySelector('.step-content');
+            
+            stepContent.innerHTML = `
+                <h4>OAuth Setup Required</h4>
+                <p>To test real Gmail authentication, you need to:</p>
+                <ol style="text-align: left; margin: 15px 0; color: #a0a9c0;">
+                    <li>Go to <a href="https://console.cloud.google.com/" target="_blank" style="color: #00F7FF;">Google Cloud Console</a></li>
+                    <li>Add this domain to authorized origins</li>
+                    <li>Configure OAuth consent screen</li>
+                    <li>Enable Gmail API</li>
+                </ol>
+                <button class="btn btn-secondary" onclick="copyAuthUrl('${authUrl}')" style="margin: 10px 5px;">
+                    Copy Auth URL
+                </button>
+                <button class="btn btn-primary" onclick="simulateGmailSuccess()" style="margin: 10px 5px;">
+                    Demo Mode
+                </button>
+            `;
+            
+            // Remove loading spinner
+            const spinner = step1.querySelector('.loading-spinner');
+            if (spinner) spinner.remove();
+        }
+        
+        // Copy auth URL to clipboard
+        function copyAuthUrl(url) {
+            navigator.clipboard.writeText(url).then(function() {
+                alert('OAuth URL copied to clipboard! You can test this in a new tab.');
+            }).catch(function() {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('OAuth URL copied to clipboard!');
+            });
+        }
+        
+        // Simulate successful Gmail auth for demo
+        function simulateGmailSuccess() {
+            handleGmailSuccess({
+                access_token: 'demo_token_' + Date.now(),
+                demo: true
+            });
+        }
+        
+        // Real Outlook Authentication
+        function authenticateOutlook() {
+            selectedProvider = 'outlook';
+            closeModal('signupModal');
+            showConnectionModal('outlook');
+            
+            // For now, simulate Outlook auth since we don't have the client ID
+            setTimeout(() => {
+                handleOutlookSuccess({
+                    accessToken: 'demo_outlook_token_' + Date.now(),
+                    demo: true
+                });
+            }, 2000);
+        }
+        
+        // Handle successful Gmail authentication
+        function handleGmailSuccess(response) {
+            console.log('Gmail auth successful:', response);
+            
+            // Store auth data
+            if (response.access_token) {
+                sessionStorage.setItem('gmail_token', response.access_token);
+                sessionStorage.setItem('auth_provider', 'gmail');
+                sessionStorage.setItem('user_email', response.email || 'user@gmail.com');
+            }
+            
+            // Continue with the flow
+            currentStep = 2;
+            updateStepProgress();
+            
+            // Simulate email analysis
+            setTimeout(() => {
+                currentStep = 3;
+                updateStepProgress();
+                
+                setTimeout(() => {
+                    closeModal('emailModal');
+                    showSuccessModal();
+                }, 3000);
+            }, 2000);
+        }
+        
+        // Handle successful Outlook authentication
+        function handleOutlookSuccess(response) {
+            console.log('Outlook auth successful:', response);
+            
+            // Store auth data
+            if (response.accessToken) {
+                sessionStorage.setItem('outlook_token', response.accessToken);
+                sessionStorage.setItem('auth_provider', 'outlook');
+                sessionStorage.setItem('user_email', response.account?.username || 'user@outlook.com');
+            }
+            
+            // Continue with the flow
+            currentStep = 2;
+            updateStepProgress();
+            
+            // Simulate email analysis
+            setTimeout(() => {
+                currentStep = 3;
+                updateStepProgress();
+                
+                setTimeout(() => {
+                    closeModal('emailModal');
+                    showSuccessModal();
+                }, 3000);
+            }, 2000);
+        }
+        
+        // Handle authentication errors
+        function handleAuthError(error) {
+            console.error('Authentication error:', error);
+            
+            // Show error in the connection modal
+            const step1 = document.getElementById('step1');
+            const stepContent = step1.querySelector('.step-content');
+            stepContent.innerHTML = `
+                <h4 style="color: #ff4444;">Authentication Error</h4>
+                <p style="color: #ff8888;">${error}</p>
+                <button class="btn btn-primary" onclick="closeModal('emailModal'); openSignupModal();" style="margin-top: 15px;">
+                    Try Again
+                </button>
+                <button class="btn btn-secondary" onclick="simulateGmailSuccess();" style="margin-top: 15px; margin-left: 10px;">
+                    Continue in Demo Mode
+                </button>
+            `;
+            
+            // Remove loading spinner
+            const spinner = step1.querySelector('.loading-spinner');
+            if (spinner) spinner.remove();
+        }
+        
+        function showConnectionModal(provider) {
+            // Update modal title based on provider
+            const title = provider === 'gmail' ? 'Connecting to Gmail...' : 'Connecting to Outlook...';
+            document.getElementById('emailModalTitle').textContent = title;
+            
+            const authText = provider === 'gmail' ? 'Initializing Gmail authentication...' : 'Initializing Microsoft authentication...';
+            document.getElementById('authText').textContent = authText;
+            
+            // Reset steps
+            currentStep = 1;
+            updateStepProgress();
+            
+            document.getElementById('emailModal').style.display = 'block';
+        }
+        
+        // Check for OAuth tokens in URL (for implicit flow)
+        function checkForOAuthCallback() {
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            
+            const accessToken = params.get('access_token');
+            const state = params.get('state');
+            const error = params.get('error');
+            
+            if (error) {
+                console.error('OAuth error:', error);
+                handleAuthError('OAuth error: ' + error);
+                return;
+            }
+            
+            if (accessToken && state === 'gmail') {
+                console.log('Gmail OAuth callback received');
+                selectedProvider = 'gmail';
+                showConnectionModal('gmail');
+                handleGmailSuccess({ access_token: accessToken });
+                
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+        
+        // Check for OAuth redirect on page load
+        window.addEventListener('load', function() {
+            // Check for hash-based tokens (implicit flow)
+            checkForOAuthCallback();
+            
+            // Check for authorization code (authorization code flow)
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            const error = urlParams.get('error');
+            
+            if (error) {
+                console.error('OAuth error:', error);
+                handleAuthError('OAuth error: ' + error);
+                return;
+            }
+            
+            if (code && state) {
+                console.log('OAuth callback received:', { code, state });
+                selectedProvider = state;
+                showConnectionModal(state);
+                
+                // In a real app, you'd send the code to your backend
+                // For demo, just show success
+                if (state === 'gmail') {
+                    setTimeout(() => handleGmailSuccess({ demo: true, code }), 1000);
+                } else if (state === 'outlook') {
+                    setTimeout(() => handleOutlookSuccess({ demo: true, code }), 1000);
+                }
+                
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+
+        // Modal functions
+        function openSignupModal() {
+            document.getElementById('signupModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function connectEmail(provider) {
+            // Legacy function - now handled by authenticateGmail/authenticateOutlook
+            if (provider === 'gmail') {
+                authenticateGmail();
+            } else {
+                authenticateOutlook();
+            }
+        }
+
+        function simulateOAuthFlow() {
+            currentStep = 1;
+            updateStepProgress();
+            
+            // Step 1: Redirecting (2 seconds)
+            setTimeout(() => {
+                currentStep = 2;
+                updateStepProgress();
+                
+                // Step 2: Permissions (3 seconds)
+                setTimeout(() => {
+                    currentStep = 3;
+                    updateStepProgress();
+                    
+                    // Step 3: AI Analysis (4 seconds)
+                    setTimeout(() => {
+                        closeModal('emailModal');
+                        showSuccessModal();
+                    }, 4000);
+                }, 3000);
+            }, 2000);
+        }
+
+        function updateStepProgress() {
+            const steps = document.querySelectorAll('.step');
+            
+            steps.forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                
+                if (index + 1 < currentStep) {
+                    step.classList.add('completed');
+                    step.querySelector('.step-number').textContent = '✓';
+                } else if (index + 1 === currentStep) {
+                    step.classList.add('active');
+                } else {
+                    step.querySelector('.step-number').textContent = index + 1;
+                }
+            });
+        }
+
+        function showSuccessModal() {
+            // Animate email count
+            animateCounter('emailCount', 247, 2000);
+            
+            document.getElementById('successModal').style.display = 'block';
+        }
+
+        function animateCounter(elementId, target, duration) {
+            const element = document.getElementById(elementId);
+            const start = 0;
+            const startTime = performance.now();
+            
+            function updateCounter(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const current = Math.floor(start + (target - start) * progress);
+                
+                element.textContent = current;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                }
+            }
+            
+            requestAnimationFrame(updateCounter);
+        }
+
+        function goToDashboard() {
+            alert('Redirecting to dashboard... (In a real app, this would navigate to the main dashboard)');
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // FAQ toggle
+        function toggleFaq(element) {
+            const answer = element.nextElementSibling;
+            const isOpen = answer.classList.contains('open');
+            
+            // Close all FAQs
+            document.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
+            document.querySelectorAll('.faq-question span:last-child').forEach(s => s.textContent = '+');
+            
+            if (!isOpen) {
+                answer.classList.add('open');
+                element.querySelector('span:last-child').textContent = '-';
+            }
+        }
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Add intersection observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements for animation
+        document.querySelectorAll('.pricing-card, .faq-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(50px)';
+            el.style.transition = 'all 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
