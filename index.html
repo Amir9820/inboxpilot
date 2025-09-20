@@ -1067,11 +1067,11 @@
             closeModal('signupModal');
             showConnectionModal('gmail');
             
-            // Use authorization code flow instead of implicit flow
-            const currentUrl = window.location.origin + window.location.pathname;
+            // Use the full path including index.html to avoid conflicts
+            const redirectUri = 'https://amir9820.github.io/inboxpilot/index.html';
             const authUrl = `https://accounts.google.com/oauth/authorize?` +
                 `client_id=${GOOGLE_CLIENT_ID}&` +
-                `redirect_uri=${encodeURIComponent(currentUrl)}&` +
+                `redirect_uri=${encodeURIComponent(redirectUri)}&` +
                 `scope=${encodeURIComponent('https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.modify https://www.googleapis.com/auth/userinfo.email')}&` +
                 `response_type=code&` +
                 `state=gmail&` +
