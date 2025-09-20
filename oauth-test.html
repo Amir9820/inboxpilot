@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OAuth Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 50px; 
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #4285f4;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #3367d6;
+        }
+        .info {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Google OAuth Test for InboxPilot</h1>
+        
+        <div class="info">
+            <strong>Testing OAuth Configuration:</strong><br>
+            Client ID: 1089222678499-a0kbclrqgpb5d9goc80afsekhh711had.apps.googleusercontent.com<br>
+            Redirect URI: https://amir9820.github.io/inboxpilot/<br>
+            Current URL: <span id="currentUrl"></span>
+        </div>
+
+        <button onclick="testBasicOAuth()">Test Basic OAuth (Minimal Scopes)</button>
+        <button onclick="testGmailOAuth()">Test Gmail OAuth (Full Scopes)</button>
+        <button onclick="showManualURL()">Show Manual OAuth URL</button>
+
+        <div id="results"></div>
+
+        <div class="info">
+            <strong>Debug Info:</strong>
+            <div id="debugInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        const CLIENT_ID = '1089222678499-a0kbclrqgpb5d9goc80afsekhh711had.apps.googleusercontent.com';
+        const REDIRECT_URI = 'https://amir9820.github.io/inboxpilot/';
+
+        // Show current URL
+        document.getElementById('currentUrl').textContent = window.location.href;
+
+        // Check for OAuth callback on page load
+        window.onload = function() {
+            checkOAuthCallback();
+        };
+
+        function testBasicOAuth() {
+            const authUrl = `https://accounts.google.com/oauth/authorize?` +
+                `client_id=${CLIENT_ID}&` +
+                `redirect_uri=${encodeURIComponent(REDIRECT_URI)}&` +
+                `scope=${encodeURIComponent('openid email profile')}&` +
+                `response_type=code&` +
+                `state=basic_test`;
+            
+            showResults('Redirecting to Google OAuth with basic scopes...', 'info');
+            setTimeout(() => {
+                window.location.href = authUrl;
+            }, 1000);
+        }
+
+        function testGmailOAuth() {
+            const authUrl = `https://accounts.google.com/oauth/authorize?` +
+                `client_id=${CLIENT_ID}&` +
+                `redirect_uri=${encodeURIComponent(REDIRECT_URI)}&` +
+                `scope=${encodeURIComponent('openid email profile https://www.googleapis.com/auth/gmail.readonly')}&` +
+                `response_type=code&` +
+                `state=gmail_test`;
+            
+            showResults('Redirecting to Google OAuth with Gmail scopes...', 'info');
+            setTimeout(() => {
+                window.location.href = authUrl;
+            }, 1000);
+        }
+
+        function showManualURL() {
+            const authUrl = `https://accounts.google.com/oauth/authorize?` +
+                `client_id=${CLIENT_ID}&` +
+                `redirect_uri=${encodeURIComponent(REDIRECT_URI)}&` +
+                `scope=${encodeURIComponent('openid email profile')}&` +
+                `response_type=code&` +
+                `state=manual_test`;
+            
+            showResults(`
+                <strong>Manual OAuth URL:</strong><br>
+                <a href="${authUrl}" target="_blank">${authUrl}</a><br><br>
+                Click the link above to test OAuth manually in a new tab.
+            `, 'info');
+        }
+
+        function checkOAuthCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            const error = urlParams.get('error');
+            const errorDescription = urlParams.get('error_description');
+
+            let debugInfo = `
+                <strong>URL Parameters:</strong><br>
+                code: ${code || 'none'}<br>
+                state: ${state || 'none'}<br>
+                error: ${error || 'none'}<br>
+                error_description: ${errorDescription || 'none'}<br>
+                Full URL: ${window.location.href}
+            `;
+
+            document.getElementById('debugInfo').innerHTML = debugInfo;
+
+            if (error) {
+                showResults(`
+                    <strong>OAuth Error Detected:</strong><br>
+                    Error: ${error}<br>
+                    Description: ${errorDescription || 'No description provided'}<br>
+                    State: ${state}
+                `, 'error');
+                return;
+            }
+
+            if (code && state) {
+                showResults(`
+                    <strong>🎉 OAuth Success!</strong><br>
+                    Authorization code received: ${code.substring(0, 20)}...<br>
+                    State: ${state}<br>
+                    Your OAuth is working correctly!
+                `, 'success');
+                
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+                return;
+            }
+
+            if (!code && !error) {
+                showResults('No OAuth callback detected. Click a test button above to start.', 'info');
+            }
+        }
+
+        function showResults(message, type) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+    </script>
+</body>
+</html>
